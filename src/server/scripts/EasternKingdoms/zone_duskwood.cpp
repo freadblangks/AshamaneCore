@@ -223,12 +223,9 @@ struct npc_stalvan : public ScriptedAI
 
     void JustDied(Unit* /*killer*/) override
     {
-        if (Creature* tobias = GetTobias())
-        {
-            Talk(SAY_06, tobias);
-            tobias->AI()->Talk(SAY_04);
-            tobias->DespawnOrUnsummon(4000);
-        }
+        Talk(SAY_06, GetTobias());
+        GetTobias()->AI()->Talk(SAY_04);
+        GetTobias()->DespawnOrUnsummon(4000);
     }
 
     Creature* GetTobias()
@@ -275,45 +272,37 @@ struct npc_stalvan : public ScriptedAI
                     break;
 
                 case EVENT_TOBIAS_STEP_1:
-                    if (Creature* tobias = GetTobias())
-                    {
-                        tobias->SetFacingToObject(me, true);
-                        me->SetFacingToObject(tobias, true);
-                        tobias->AI()->Talk(SAY_00, me);
-                    }
+                    GetTobias()->SetFacingToObject(me, true);
+                    me->SetFacingToObject(GetTobias(), true);
+                    GetTobias()->AI()->Talk(SAY_00, me);
                     break;
 
                 case EVENT_TOBIAS_STEP_2:
-                    if (Creature* tobias = GetTobias())
-                        tobias->AI()->Talk(SAY_01, me);
+                    GetTobias()->AI()->Talk(SAY_01, me);
                     break;
 
                 case EVENT_TOBIAS_STEP_3:
-                    if (Creature* tobias = GetTobias())
-                        tobias->AI()->Talk(SAY_02, me);
+                    GetTobias()->AI()->Talk(SAY_02, me);
                     break;
 
                 case EVENT_TOBIAS_STEP_4:
-                    if (Creature* tobias = GetTobias())
-                    {
-                        tobias->CastSpell(tobias, SPELL_WORGEN_TRANSFORMATION, true);
-                        tobias->SetReactState(REACT_AGGRESSIVE);
+                    GetTobias()->CastSpell(GetTobias(), SPELL_WORGEN_TRANSFORMATION, true);
+                    GetTobias()->SetReactState(REACT_AGGRESSIVE);
 
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
-                        me->AddThreat(tobias, 10.f);
-                        tobias->AddThreat(me, 10.f);
-                        tobias->SetInCombatWith(me);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
+                    me->AddThreat(GetTobias(), 10.f);
+                    GetTobias()->AddThreat(me, 10.f);
+                    GetTobias()->SetInCombatWith(me);
 
-                        if (me->Attack(tobias, true))
-                            me->GetMotionMaster()->MoveChase(tobias);
+                    if (me->Attack(GetTobias(), true))
+                        me->GetMotionMaster()->MoveChase(GetTobias());
 
-                        if (tobias->Attack(me, true))
-                            tobias->GetMotionMaster()->MoveChase(me);
+                    if (GetTobias()->Attack(me, true))
+                        GetTobias()->GetMotionMaster()->MoveChase(me);
 
-                        me->SetReactState(REACT_AGGRESSIVE);
+                    me->SetReactState(REACT_AGGRESSIVE);
 
-                        tobias->AI()->Talk(SAY_03, tobias->GetOwner());
-                    }
+                    GetTobias()->AI()->Talk(SAY_03, GetTobias()->GetOwner());
                     break;
 
                 default:

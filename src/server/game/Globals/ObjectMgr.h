@@ -489,6 +489,7 @@ struct ScriptParam
 typedef std::map<ObjectGuid, ObjectGuid> LinkedRespawnContainer;
 typedef std::unordered_map<uint32, CreatureTemplate> CreatureTemplateContainer;
 typedef std::unordered_map<uint32, CreatureAddon> CreatureTemplateAddonContainer;
+typedef std::unordered_map<uint32, std::vector<float>> CreatureTemplateSparringContainer;
 typedef std::unordered_map<uint32, uint32> CreatureTemplateJournalContainer;
 typedef std::unordered_map<ObjectGuid::LowType, CreatureData> CreatureDataContainer;
 typedef std::unordered_map<ObjectGuid::LowType, CreatureAddon> CreatureAddonContainer;
@@ -971,6 +972,7 @@ class TC_GAME_API ObjectMgr
         GameObjectAddon const* GetGameObjectAddon(ObjectGuid::LowType lowguid) const;
         GameObjectTemplateAddon const* GetGameObjectTemplateAddon(uint32 entry) const;
         CreatureAddon const* GetCreatureTemplateAddon(uint32 entry) const;
+        std::vector<float> const* GetCreatureTemplateSparringValues(uint32 entry) const;
         ItemTemplate const* GetItemTemplate(uint32 entry) const;
         ItemTemplateContainer const* GetItemTemplateStore() const { return &_itemTemplateStore; }
 
@@ -1202,6 +1204,7 @@ class TC_GAME_API ObjectMgr
         void LoadCreatureTemplates();
         void LoadCreatureTemplateJournals();
         void LoadCreatureTemplateAddons();
+        void LoadCreatureTemplateSparring();
         void LoadScriptParams();
         void LoadCreatureTemplate(Field* fields);
         void LoadCreatureScalingData();
@@ -1755,6 +1758,7 @@ class TC_GAME_API ObjectMgr
         GameObjectQuestItemMap _gameObjectQuestItemStore;
         CreatureQuestItemMap _creatureQuestItemStore;
         CreatureTemplateAddonContainer _creatureTemplateAddonStore;
+        CreatureTemplateSparringContainer _creatureTemplateSparringStore;
         EquipmentInfoContainer _equipmentInfoStore;
         LinkedRespawnContainer _linkedRespawnStore;
         CreatureLocaleContainer _creatureLocaleStore;

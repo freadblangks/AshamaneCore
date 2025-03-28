@@ -19,13 +19,14 @@
 #ifndef _OBJECT_H
 #define _OBJECT_H
 
-#include "Area.h"
 #include "Common.h"
 #include "GridReference.h"
 #include "GridRefManager.h"
+#include "ModelIgnoreFlags.h"
 #include "MovementInfo.h"
 #include "ObjectDefines.h"
 #include "ObjectGuid.h"
+#include "Optional.h"
 #include "PhaseShift.h"
 #include "Position.h"
 #include "SharedDefines.h"
@@ -432,12 +433,8 @@ class TC_GAME_API WorldObject : public Object, public WorldLocation
         // if negative it is used as PhaseGroupId
         void SetDBPhase(int32 p) { _dbPhase = p; }
 
-        uint32 GetAreaId() const;
         uint32 GetZoneId() const;
-
-        uint32 GetAreaIdFromPosition() const;
-        uint32 GetZoneIdFromPosition() const;
-
+        uint32 GetAreaId() const;
         void GetZoneAndAreaId(uint32& zoneid, uint32& areaid) const;
 
         InstanceScript* GetInstanceScript() const;
@@ -463,8 +460,8 @@ class TC_GAME_API WorldObject : public Object, public WorldLocation
         // use only if you will sure about placing both object at same map
         bool IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D = true) const;
         bool IsWithinDistInMap(WorldObject const* obj, float dist2compare, bool is3D = true) const;
-        bool IsWithinLOS(float x, float y, float z) const;
-        bool IsWithinLOSInMap(WorldObject const* obj) const;
+        bool IsWithinLOS(float x, float y, float z, VMAP::ModelIgnoreFlags ignoreFlags = VMAP::ModelIgnoreFlags::Nothing) const;
+        bool IsWithinLOSInMap(WorldObject const* obj, VMAP::ModelIgnoreFlags ignoreFlags = VMAP::ModelIgnoreFlags::Nothing) const;
         Position GetHitSpherePointFor(Position const& dest) const;
         void GetHitSpherePointFor(Position const& dest, float& x, float& y, float& z) const;
         bool GetDistanceOrder(WorldObject const* obj1, WorldObject const* obj2, bool is3D = true) const;
@@ -514,10 +511,6 @@ class TC_GAME_API WorldObject : public Object, public WorldLocation
         Map* GetMap() const { ASSERT(m_currMap); return m_currMap; }
         Map* FindMap() const { return m_currMap; }
         //used to check all object's GetMap() calls when object is not in world!
-
-        void SetArea(Area* area) { m_area = area; }
-        Area* GetArea() const { return m_area; }
-        Area* GetZone() const { return m_area ? m_area->GetZone(): nullptr; }
 
         void SetZoneScript();
         ZoneScript* GetZoneScript() const { return m_zoneScript; }
@@ -588,6 +581,8 @@ class TC_GAME_API WorldObject : public Object, public WorldLocation
 
         bool isActiveObject() const { return m_isActive; }
         void setActive(bool isActiveObject);
+        bool IsVisibilityOverridden() const { return m_visibilityDistanceOverride.is_initialized(); }
+        void SetVisibilityDistanceOverride(VisibilityDistanceType type);
         void SetWorldObject(bool apply);
         bool IsPermanentWorldObject() const { return m_isWorldObject; }
         bool IsWorldObject() const;
@@ -620,9 +615,8 @@ class TC_GAME_API WorldObject : public Object, public WorldLocation
     protected:
         std::string m_name;
         bool m_isActive;
+        Optional<float> m_visibilityDistanceOverride;
         const bool m_isWorldObject;
-
-        Area*       m_area;
         ZoneScript* m_zoneScript;
 
         // transports

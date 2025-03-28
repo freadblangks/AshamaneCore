@@ -202,8 +202,8 @@ void GameEventMgr::StopEvent(uint16 event_id, bool overwrite)
             for (itr = data.conditions.begin(); itr != data.conditions.end(); ++itr)
                 itr->second.done = 0;
 
-            SQLTransaction trans = CharacterDatabase.BeginTransaction();
-            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ALL_GAME_EVENT_CONDITION_SAVE);
+            CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+            CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_ALL_GAME_EVENT_CONDITION_SAVE);
             stmt->setUInt8(0, uint8(event_id));
             trans->Append(stmt);
 
@@ -935,43 +935,6 @@ void GameEventMgr::LoadFromDB()
             TC_LOG_INFO("server.loading", ">> Loaded %u pools for game events in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
         }
     }
-
-    TC_LOG_INFO("server.loading", "Loading Game Event Spell Area Data...");
-    {
-        uint32 oldMSTime = getMSTime();
-
-        //                                               0           1       2
-        QueryResult result = WorldDatabase.Query("SELECT eventEntry, areaId, spellId FROM game_event_spell_area");
-
-        if (!result)
-            TC_LOG_INFO("server.loading", ">> Loaded 0 spell area for game events. DB table `game_event_spell_area` is empty.");
-        else
-        {
-            uint32 count = 0;
-            do
-            {
-                Field* fields = result->Fetch();
-
-                uint16 event_id = fields[0].GetUInt8();
-
-                if (event_id >= mGameEvent.size())
-                {
-                    TC_LOG_ERROR("sql.sql", "`game_event_spell_area`: game event id (%u) is out of range compared to max event id in `game_event`.", event_id);
-                    continue;
-                }
-
-                uint32 areaId   = fields[1].GetUInt32();
-                uint32 spellId  = fields[2].GetUInt32();
-
-                std::pair<uint32, uint32> pairIndex = std::make_pair(areaId, spellId);
-                mGameEventSpellAreas[pairIndex] = event_id;
-
-                ++count;
-            } while (result->NextRow());
-
-            TC_LOG_INFO("server.loading", ">> Loaded %u spell areas for game events in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
-        }
-    }
 }
 
 uint64 GameEventMgr::GetNPCFlag(Creature* cr)
@@ -1608,9 +1571,9 @@ void GameEventMgr::HandleQuestComplete(uint32 quest_id)
                 if (citr->second.done > citr->second.reqNum)
                     citr->second.done = citr->second.reqNum;
                 // save the change to db
-                SQLTransaction trans = CharacterDatabase.BeginTransaction();
+                CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
 
-                PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GAME_EVENT_CONDITION_SAVE);
+                CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GAME_EVENT_CONDITION_SAVE);
                 stmt->setUInt8(0, uint8(event_id));
                 stmt->setUInt32(1, condition);
                 trans->Append(stmt);
@@ -1653,9 +1616,9 @@ bool GameEventMgr::CheckOneGameEventConditions(uint16 event_id)
 
 void GameEventMgr::SaveWorldEventStateToDB(uint16 event_id)
 {
-    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+    CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
 
-    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GAME_EVENT_SAVE);
+    CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GAME_EVENT_SAVE);
     stmt->setUInt8(0, uint8(event_id));
     trans->Append(stmt);
 
@@ -1728,17 +1691,6 @@ uint16 GameEventMgr::GetEventIdForQuest(Quest const* quest) const
         return 0;
 
     return itr->second;
-}
-
-bool GameEventMgr::IsSpellAreaEventActive(uint32 areaId, uint32 spellId)
-{
-    auto itr = mGameEventSpellAreas.find(std::make_pair(areaId, spellId));
-
-    // If no event for this spell_area, always true
-    if (itr == mGameEventSpellAreas.end())
-        return true;
-
-    return IsActiveEvent(itr->second);
 }
 
 bool IsHolidayActive(HolidayIds id)

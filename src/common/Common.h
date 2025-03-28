@@ -51,9 +51,7 @@
 
 #if TRINITY_COMPILER == TRINITY_COMPILER_MICROSOFT
 
-#define snprintf _snprintf
 #define atoll _atoi64
-#define vsnprintf _vsnprintf
 #define llabs _abs64
 
 #else
@@ -212,6 +210,13 @@ namespace Ashamane
 
     private:
         std::unordered_map<std::string, boost::any> dataMap;
+    };
+
+    template<class ArgumentType, class ResultType>
+    struct unary_function
+    {
+        typedef ArgumentType argument_type;
+        typedef ResultType result_type;
     };
 }
 

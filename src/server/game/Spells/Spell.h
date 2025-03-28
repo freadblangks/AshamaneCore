@@ -65,6 +65,7 @@ enum TriggerCastFlags : uint32;
 enum WeaponAttackType : uint8;
 
 #define SPELL_CHANNEL_UPDATE_INTERVAL (1 * IN_MILLISECONDS)
+#define MAX_SPELL_RANGE_TOLERANCE 3.0f
 
 enum SpellCastFlags
 {
@@ -560,6 +561,7 @@ class TC_GAME_API Spell
         bool CheckSpellCancelsPacify(uint32* param1) const;
         bool CheckSpellCancelsFear(uint32* param1) const;
         bool CheckSpellCancelsConfuse(uint32* param1) const;
+        bool CheckSpellCancelsNoActions(uint32* param1) const;
 
         int32 CalculateDamage(uint8 i, Unit const* target, float* var = nullptr) const;
 

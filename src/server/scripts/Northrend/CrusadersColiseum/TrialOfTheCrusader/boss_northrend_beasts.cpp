@@ -299,7 +299,7 @@ class boss_gormok : public CreatureScript
         }
 };
 
-class SnobolledTargetSelector : public std::unary_function<Unit*, bool>
+class SnobolledTargetSelector : public Ashamane::unary_function<Unit*, bool>
 {
 public:
     SnobolledTargetSelector(Unit const* /*unit*/) { }
